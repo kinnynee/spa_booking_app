@@ -1,0 +1,16 @@
+const { Router } = require('express');
+
+const authController = require('./auth.controller');
+const { authenticate } = require('../../common/middlewares/auth.middleware');
+const { authRateLimiter } = require('../../common/middlewares/security.middleware');
+const { validate } = require('../../common/middlewares/validate.middleware');
+const { asyncHandler } = require('../../common/utils/async-handler');
+const { loginSchema, registerSchema } = require('./auth.validation');
+
+const router = Router();
+
+router.post('/register', authRateLimiter, validate(registerSchema), asyncHandler(authController.register));
+router.post('/login', authRateLimiter, validate(loginSchema), asyncHandler(authController.login));
+router.get('/me', authenticate, asyncHandler(authController.me));
+
+module.exports = router;
