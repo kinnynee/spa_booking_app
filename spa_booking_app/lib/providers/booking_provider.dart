@@ -12,4 +12,20 @@ class BookingProvider with ChangeNotifier {
   List<Appointment> get bookings => _bookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  // Fetch list of bookings from API
+  Future<void> fetchMyBookings() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _bookings = await _apiService.fetchMyBookings();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
