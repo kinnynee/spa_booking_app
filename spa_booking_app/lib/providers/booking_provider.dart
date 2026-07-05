@@ -28,4 +28,35 @@ class BookingProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Create new booking
+  Future<bool> createBooking(String serviceId, DateTime date, String time, String note) async {
+    try {
+      final newBooking = await _apiService.createBooking(serviceId, date, time, note);
+      _bookings.insert(0, newBooking);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Cancel booking
+  Future<bool> cancelBooking(String bookingId) async {
+    try {
+      await _apiService.cancelBooking(bookingId);
+      final index = _bookings.indexWhere((b) => b.id == bookingId);
+      if (index != -1) {
+        _bookings[index] = _bookings[index].copyWith(status: AppointmentStatus.cancelled);
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
 }
