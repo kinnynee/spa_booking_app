@@ -4,9 +4,10 @@ const config = require('../../config/env');
 
 function errorHandler(error, req, res, _next) {
   const statusCode = error.statusCode || 500;
+  const isServerError = statusCode >= 500;
   const response = {
     success: false,
-    message: error.message || 'Internal server error.',
+    message: isServerError ? 'Internal server error.' : error.message || 'Request failed.',
     code: error.code || 'INTERNAL_ERROR',
     requestId: req.id,
   };
@@ -15,7 +16,7 @@ function errorHandler(error, req, res, _next) {
     response.details = error.details;
   }
 
-  if (config.env !== 'production' && error.stack) {
+  if (config.env !== 'production' && error.stack && !isServerError) {
     response.stack = error.stack;
   }
 
