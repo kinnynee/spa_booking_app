@@ -6,6 +6,11 @@ async function createBooking(req, res) {
   return sendCreated(res, booking, 'Booking created.');
 }
 
+async function listBookings(req, res) {
+  const bookings = await bookingService.listBookings(req.validated.query);
+  return sendSuccess(res, bookings);
+}
+
 async function listMyBookings(req, res) {
   const bookings = await bookingService.listUserBookings(req.user.id);
   return sendSuccess(res, bookings);
@@ -20,8 +25,29 @@ async function cancelBooking(req, res) {
   return sendSuccess(res, booking, 'Booking cancelled.');
 }
 
+async function updateBookingPaymentStatus(req, res) {
+  const booking = await bookingService.updateBookingPaymentStatus(
+    req.validated.params.id,
+    req.validated.body.paymentStatus,
+  );
+  return sendSuccess(res, booking, 'Booking payment status updated.');
+}
+
+async function updateBookingStatus(req, res) {
+  const booking = await bookingService.updateBookingStatus(
+    req.user.id,
+    req.validated.params.id,
+    req.validated.body.status,
+    req.validated.body.reason,
+  );
+  return sendSuccess(res, booking, 'Booking status updated.');
+}
+
 module.exports = {
   cancelBooking,
   createBooking,
+  listBookings,
   listMyBookings,
+  updateBookingPaymentStatus,
+  updateBookingStatus,
 };
