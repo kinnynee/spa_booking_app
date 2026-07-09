@@ -6,6 +6,9 @@ const userRepository = require('../users/user.repository');
 const profileRepository = require('../profiles/profile.repository');
 const { toUserDto } = require('../users/user.dto');
 
+const ADMIN_LOGIN_ALIAS = 'admin@local.spa';
+const ADMIN_EMAIL = 'admin@spa.local';
+
 async function register(payload) {
   const existingUser = await userRepository.findByEmail(payload.email);
 
@@ -32,16 +35,16 @@ async function register(payload) {
 }
 
 async function login(payload) {
-  const user = await userRepository.findByEmail(payload.email);
+  const user = await userRepository.findByEmail(normalizeLoginIdentifier(payload.email));
 
   if (!user || !user.is_active) {
-    throw new AppError('Invalid email or password.', 401, 'INVALID_CREDENTIALS');
+    throw new AppError('Invalid account or password.', 401, 'INVALID_CREDENTIALS');
   }
 
   const passwordMatches = await verifyPassword(payload.password, user.password_hash);
 
   if (!passwordMatches) {
-    throw new AppError('Invalid email or password.', 401, 'INVALID_CREDENTIALS');
+    throw new AppError('Invalid account or password.', 401, 'INVALID_CREDENTIALS');
   }
 
   const profile = await profileRepository.findByUserId(user.id);
@@ -51,6 +54,13 @@ async function login(payload) {
     user: toUserDto({ ...user, profile }),
     ...tokens,
   };
+}
+
+function normalizeLoginIdentifier(value) {
+  const account = String(value || '')
+    .trim()
+    .toLowerCase();
+  return account === ADMIN_LOGIN_ALIAS ? ADMIN_EMAIL : account;
 }
 
 function createTokenPair(user) {

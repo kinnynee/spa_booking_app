@@ -13,7 +13,7 @@ const registerSchema = z.object({
 
 const loginSchema = z.object({
   body: z.object({
-    email: z.string().trim().email().toLowerCase(),
+    email: z.string().trim().min(1).max(160).toLowerCase(),
     password: z.string().min(8).max(72),
   }),
   query: z.object({}).passthrough(),
