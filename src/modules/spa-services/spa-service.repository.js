@@ -25,7 +25,15 @@ async function list(filters = {}) {
   }
 
   if (filters.search) {
-    query.whereILike('services.name', `%${filters.search}%`);
+    const keyword = `%${filters.search}%`;
+    query.andWhere((builder) => {
+      builder
+        .whereILike('services.name', keyword)
+        .orWhereILike('services.slug', keyword)
+        .orWhereILike('services.description', keyword)
+        .orWhereILike('categories.name', keyword)
+        .orWhereILike('categories.slug', keyword);
+    });
   }
 
   return query;
