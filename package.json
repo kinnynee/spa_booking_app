@@ -15,6 +15,7 @@
     "db:seed": "knex seed:run --knexfile knexfile.js",
     "firebase:create-db": "node scripts/create-firestore-database.js",
     "firebase:seed": "node scripts/seed-firestore.js",
+    "firebase:upload-service-images": "node --use-system-ca scripts/upload-service-images.js",
     "firebase:check": "node scripts/check-firebase.js",
     "test": "jest --runInBand",
     "prepare:hooks": "husky"

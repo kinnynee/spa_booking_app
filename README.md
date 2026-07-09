@@ -85,3 +85,19 @@ pnpm firebase:check
 `firebase:seed` creates sample `serviceCategories`, `services`, `users`, and `appointments`
 documents in the `bookingspabe` Firestore project. To create a real Firebase Auth admin account,
 set `FIREBASE_SEED_ADMIN_EMAIL` and `FIREBASE_SEED_ADMIN_PASSWORD` in `.env` before seeding.
+
+## Firebase Storage service images
+
+Service images are stored in Firebase Storage, while PostgreSQL keeps the public download URL in `spa_services.image_url`. The Flutter app already renders that field with `Image.network`.
+
+1. Enable Firebase Storage in the Firebase Console.
+2. Put the service account JSON at `.secrets/firebase-service-account.json`.
+3. Set `FIREBASE_STORAGE_BUCKET` in `.env` using the exact bucket name from Firebase Console > Storage.
+4. Keep local source images in `../assets/images`, or override the folder with `SERVICE_IMAGE_ASSET_DIR`.
+5. Upload images and update PostgreSQL:
+
+```bash
+pnpm run firebase:upload-service-images
+```
+
+The script uploads the mapped files to `service-images/` in Firebase Storage and updates services by slug. The package command uses Node `--use-system-ca` so Windows can validate Firebase TLS certificates through the system certificate store. Restart or refresh the Flutter app after it finishes so the catalog reloads the new `imageUrl` values.
