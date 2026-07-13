@@ -5,7 +5,7 @@ import '../core/constants/app_colors.dart';
 import '../models/spa_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
-import 'appointments/appointments_screen.dart';
+import 'booking/booking_screen.dart';
 import 'home/home_screen.dart';
 import 'profile/profile_screen.dart';
 import 'services/service_detail_screen.dart';
@@ -34,7 +34,7 @@ class MainShell extends StatelessWidget {
           ServicesScreen(
             onOpenService: (service) => _openServiceDetail(context, service),
           ),
-          const AppointmentsScreen(),
+          const BookingScreen(),
           ProfileScreen(
             authProvider: authProvider,
             onAppointments: () => provider.setCurrentTab(2),

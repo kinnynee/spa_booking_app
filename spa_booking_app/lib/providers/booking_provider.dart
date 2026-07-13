@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../models/appointment.dart';
 import '../data/api/booking_api_service.dart';
 
@@ -8,10 +8,17 @@ class BookingProvider with ChangeNotifier {
   List<Appointment> _bookings = [];
   bool _isLoading = false;
   String? _error;
+  int _currentTabIndex = 0;
 
   List<Appointment> get bookings => _bookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int get currentTabIndex => _currentTabIndex;
+
+  void setCurrentTab(int index) {
+    _currentTabIndex = index;
+    notifyListeners();
+  }
 
   // Fetch list of bookings from API
   Future<void> fetchMyBookings() async {
