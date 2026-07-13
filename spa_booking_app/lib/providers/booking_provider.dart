@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/appointment.dart';
 import '../data/api/booking_api_service.dart';
 
@@ -10,6 +11,8 @@ class BookingProvider with ChangeNotifier {
   String? _error;
   int _currentTabIndex = 0;
 
+  List<Appointment> get appointments => _bookings;
+  List<Appointment> get upcomingAppointments => _bookings.where((a) => a.status == AppointmentStatus.pending || a.status == AppointmentStatus.confirmed).toList();
   List<Appointment> get bookings => _bookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -65,5 +68,26 @@ class BookingProvider with ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+}
+
+String formatMoney(int amount) {
+  return 'đ';
+}
+
+String formatDate(DateTime date) {
+  return DateFormat('dd/MM/yyyy').format(date);
+}
+
+String statusText(AppointmentStatus status) {
+  switch (status) {
+    case AppointmentStatus.pending:
+      return 'Chờ xác nhận';
+    case AppointmentStatus.confirmed:
+      return 'Đã xác nhận';
+    case AppointmentStatus.completed:
+      return 'Đã hoàn thành';
+    case AppointmentStatus.cancelled:
+      return 'Đã hủy';
   }
 }

@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
 import '../models/spa_service.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
-import 'booking/booking_screen.dart';
+import 'appointments/appointments_screen.dart';
 import 'home/home_screen.dart';
 import 'profile/profile_screen.dart';
 import 'services/service_detail_screen.dart';
@@ -34,7 +34,7 @@ class MainShell extends StatelessWidget {
           ServicesScreen(
             onOpenService: (service) => _openServiceDetail(context, service),
           ),
-          const BookingScreen(),
+          const AppointmentsScreen(),
           ProfileScreen(
             authProvider: authProvider,
             onAppointments: () => provider.setCurrentTab(2),
@@ -51,22 +51,22 @@ class MainShell extends StatelessWidget {
               NavigationDestination(
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home),
-                label: 'Trang chủ',
+                label: 'Trang chá»§',
               ),
               NavigationDestination(
                 icon: Icon(Icons.spa_outlined),
                 selectedIcon: Icon(Icons.spa),
-                label: 'Dịch vụ',
+                label: 'Dá»‹ch vá»¥',
               ),
               NavigationDestination(
                 icon: Icon(Icons.calendar_month_outlined),
                 selectedIcon: Icon(Icons.calendar_month),
-                label: 'Lịch hẹn',
+                label: 'Lá»‹ch háº¹n',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person),
-                label: 'Hồ sơ',
+                label: 'Há»“ sÆ¡',
               ),
             ],
           ),
@@ -75,3 +75,4 @@ class MainShell extends StatelessWidget {
     );
   }
 }
+

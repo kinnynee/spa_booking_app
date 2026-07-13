@@ -1,51 +1,55 @@
 class UserProfile {
   const UserProfile({
-    required this.id,
-    required this.email,
     required this.fullName,
-    this.phoneNumber,
-    this.avatarUrl,
+    required this.email,
+    required this.phone,
+    required this.birthday,
+    required this.gender,
+    required this.avatar,
   });
 
-  final String id;
-  final String email;
   final String fullName;
-  final String? phoneNumber;
-  final String? avatarUrl;
+  final String email;
+  final String phone;
+  final String birthday;
+  final String gender;
+  final String avatar;
 
-  UserProfile copyWith({
-    String? id,
-    String? email,
-    String? fullName,
-    String? phoneNumber,
-    String? avatarUrl,
-  }) {
+  factory UserProfile.fromApiJson(Map<String, dynamic> json) {
+    final profile = json['profile'];
+    final profileMap = profile is Map<String, dynamic>
+        ? profile
+        : const <String, dynamic>{};
+
     return UserProfile(
-      id: id ?? this.id,
-      email: email ?? this.email,
-      fullName: fullName ?? this.fullName,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
+      fullName:
+          json['fullName']?.toString() ??
+          json['full_name']?.toString() ??
+          'Khách hàng',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      birthday:
+          profileMap['birthDate']?.toString() ??
+          profileMap['birth_date']?.toString() ??
+          'Chưa cập nhật',
+      gender: _genderLabel(profileMap['gender']?.toString()),
+      avatar:
+          profileMap['avatarUrl']?.toString() ??
+          profileMap['avatar_url']?.toString() ??
+          '',
     );
   }
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      fullName: json['fullName'] as String,
-      phoneNumber: json['phoneNumber'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-      'fullName': fullName,
-      'phoneNumber': phoneNumber,
-      'avatarUrl': avatarUrl,
-    };
+  static String _genderLabel(String? value) {
+    switch (value) {
+      case 'male':
+        return 'Nam';
+      case 'female':
+        return 'Nữ';
+      case 'other':
+        return 'Khác';
+      default:
+        return 'Chưa cập nhật';
+    }
   }
 }
