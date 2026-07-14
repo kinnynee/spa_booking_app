@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/admin_colors.dart';
 import '../../core/constants/admin_text_styles.dart';
 import '../../core/widgets/admin_app_bar.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../screens/profile/edit_profile_screen.dart';
 import '../categories/categories_screen.dart';
 import 'spa_settings_screen.dart';
 
@@ -10,6 +13,7 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().currentUser;
     return Scaffold(
       backgroundColor: AdminColors.background,
       appBar: AdminAppBar(title: 'Lavender Spa', showMenuIcon: true),
@@ -50,10 +54,10 @@ class MoreScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text('Nguyễn Văn Hưng', style: AdminTextStyles.titleLg),
+                Text(user.fullName, style: AdminTextStyles.titleLg),
                 const SizedBox(height: 4),
                 Text(
-                  'admin@lavenderspa.vn',
+                  user.email,
                   style: AdminTextStyles.bodyMd.copyWith(
                     color: AdminColors.outline,
                   ),
@@ -136,6 +140,17 @@ class MoreScreen extends StatelessWidget {
             child: Column(
               children: [
                 _MenuTile(
+                  icon: Icons.person_outline_rounded,
+                  title: 'H\u1ed3 s\u01a1 qu\u1ea3n tr\u1ecb',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const EditProfileScreen(isAdmin: true),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1, indent: 56),
+                _MenuTile(
                   icon: Icons.settings_rounded,
                   title: 'Cài đặt Spa',
                   onTap: () => Navigator.push(
@@ -174,7 +189,7 @@ class MoreScreen extends StatelessWidget {
 
           // Logout Button
           TextButton(
-            onPressed: () {},
+            onPressed: () => context.read<AuthProvider>().logout(),
             style: TextButton.styleFrom(
               foregroundColor: AdminColors.statusCancelled,
               padding: const EdgeInsets.symmetric(vertical: 16),

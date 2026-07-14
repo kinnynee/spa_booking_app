@@ -1,20 +1,16 @@
-// Thư viện Material cung cấp ListView, button và icon cho trang hồ sơ.
 import 'package:flutter/material.dart';
-// Provider dùng để đọc user hiện tại và gọi logout.
 import 'package:provider/provider.dart';
 
-// Import màu, kiểu chữ, widget dòng thông tin và AuthProvider.
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/widgets/info_row.dart';
 import '../../providers/auth_provider.dart';
+import 'edit_profile_screen.dart';
 
-// Màn hình hồ sơ hiển thị thông tin user và các mục menu tài khoản.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
-  // build dựng phần giao diện của widget trong trang hồ sơ.
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().currentUser;
 
@@ -22,7 +18,7 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
       children: [
         Text(
-          'Hồ sơ',
+          'H\u1ed3 s\u01a1',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w900,
@@ -38,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const _BlankProfileAvatar(size: 96),
+              _ProfileAvatar(imageUrl: user.avatar),
               const SizedBox(height: 14),
               Text(user.fullName, style: AppTextStyles.sectionTitle),
               const SizedBox(height: 4),
@@ -60,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               InfoRow(
                 icon: Icons.person_outline,
-                label: 'Họ và tên',
+                label: 'H\u1ecd v\u00e0 t\u00ean',
                 value: user.fullName,
               ),
               const SizedBox(height: 14),
@@ -72,36 +68,48 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 14),
               InfoRow(
                 icon: Icons.phone_outlined,
-                label: 'Số điện thoại',
+                label: 'S\u1ed1 \u0111i\u1ec7n tho\u1ea1i',
                 value: user.phone,
               ),
               const SizedBox(height: 14),
               InfoRow(
                 icon: Icons.cake_outlined,
-                label: 'Ngày sinh',
-                value: user.birthday,
+                label: 'Ng\u00e0y sinh',
+                value: user.displayBirthday,
               ),
               const SizedBox(height: 14),
               InfoRow(
                 icon: Icons.wc_outlined,
-                label: 'Giới tính',
-                value: user.gender,
+                label: 'Gi\u1edbi t\u00ednh',
+                value: user.displayGender,
+              ),
+              const SizedBox(height: 14),
+              InfoRow(
+                icon: Icons.location_on_outlined,
+                label: '\u0110\u1ecba ch\u1ec9',
+                value: user.displayAddress,
               ),
             ],
           ),
         ),
         const SizedBox(height: 22),
-        const _MenuTile(icon: Icons.edit_outlined, title: 'Chỉnh sửa hồ sơ'),
-        const _MenuTile(icon: Icons.notifications_outlined, title: 'Thông báo'),
-        const _MenuTile(icon: Icons.help_outline, title: 'Trợ giúp'),
-        const _MenuTile(icon: Icons.settings_outlined, title: 'Cài đặt'),
+        SizedBox(
+          height: 52,
+          child: FilledButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const EditProfileScreen(isAdmin: false),
+              ),
+            ),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Ch\u1ec9nh s\u1eeda h\u1ed3 s\u01a1'),
+          ),
+        ),
         const SizedBox(height: 14),
         OutlinedButton.icon(
-          onPressed: () {
-            context.read<AuthProvider>().logout();
-          },
+          onPressed: () => context.read<AuthProvider>().logout(),
           icon: const Icon(Icons.logout),
-          label: const Text('Đăng xuất'),
+          label: const Text('\u0110\u0103ng xu\u1ea5t'),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(52),
             foregroundColor: AppColors.danger,
@@ -116,65 +124,25 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-// Avatar tròn mặc định trong trang hồ sơ.
-class _BlankProfileAvatar extends StatelessWidget {
-  const _BlankProfileAvatar({required this.size});
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.imageUrl});
 
-  final double size;
-
-  @override
-  // build dựng phần giao diện của widget trong trang hồ sơ.
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: const BoxDecoration(
-        color: AppColors.secondary,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        Icons.person_outline,
-        color: AppColors.primary,
-        size: size * .48,
-      ),
-    );
-  }
-}
-
-// Một dòng menu trong trang hồ sơ, hiện mới là mục giao diện tĩnh.
-class _MenuTile extends StatelessWidget {
-  const _MenuTile({required this.icon, required this.title});
-
-  final IconData icon;
-  final String title;
+  final String imageUrl;
 
   @override
-  // build dựng phần giao diện của widget trong trang hồ sơ.
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: AppShadows.soft,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.w800,
-              ),
+    final hasImage = Uri.tryParse(imageUrl)?.hasAbsolutePath == true;
+    return CircleAvatar(
+      radius: 48,
+      backgroundColor: AppColors.secondary,
+      backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+      child: hasImage
+          ? null
+          : const Icon(
+              Icons.person_outline,
+              color: AppColors.primary,
+              size: 48,
             ),
-          ),
-          const Icon(Icons.chevron_right, color: AppColors.textLight),
-        ],
-      ),
     );
   }
 }

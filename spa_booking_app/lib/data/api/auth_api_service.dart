@@ -55,6 +55,28 @@ class AuthApiService {
     return _sessionFrom(data);
   }
 
+  Future<UserProfile> updateProfile({
+    required String fullName,
+    required String phone,
+    required String birthDate,
+    required String gender,
+    required String address,
+    required String avatarUrl,
+  }) async {
+    final data = await _client.put<Map<String, dynamic>>(
+      '/profiles/me',
+      body: {
+        'fullName': fullName,
+        'phone': phone.isEmpty ? null : phone,
+        'birthDate': birthDate.isEmpty ? null : birthDate,
+        'gender': gender.isEmpty ? null : gender,
+        'address': address.isEmpty ? null : address,
+        'avatarUrl': avatarUrl.isEmpty ? null : avatarUrl,
+      },
+    );
+    return UserProfile.fromApiJson(data);
+  }
+
   AuthSession _sessionFrom(Map<String, dynamic> data) {
     return AuthSession(
       user: UserProfile.fromApiJson(

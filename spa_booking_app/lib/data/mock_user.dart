@@ -6,8 +6,10 @@ const UserProfile mockUser = UserProfile(
   fullName: 'Trần Trung Kiên',
   email: 'admin@spa.local',
   phone: '0901 234 567',
-  birthday: '01/01/2005',
+  birthday: '2005-01-01',
   gender: 'Nam',
+  genderCode: 'male',
+  address: '',
   avatar: '',
   role: 'admin',
 );

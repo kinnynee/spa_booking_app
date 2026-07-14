@@ -153,6 +153,33 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateProfile({
+    required String fullName,
+    required String phone,
+    required String birthDate,
+    required String gender,
+    required String address,
+    required String avatarUrl,
+  }) async {
+    _setLoading(true);
+    try {
+      _currentUser = await _apiService.updateProfile(
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        birthDate: birthDate,
+        gender: gender,
+        address: address.trim(),
+        avatarUrl: avatarUrl.trim(),
+      );
+      return true;
+    } catch (error) {
+      _errorMessage = _messageFrom(error, 'Could not update profile.');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void _applySession(AuthSession session) {
     _currentUser = session.user;
     _accessToken = session.accessToken;
