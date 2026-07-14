@@ -65,6 +65,21 @@ async function listByUserId(userId) {
     .orderBy('bookings.appointment_time', 'desc');
 }
 
+async function hasUserTimeConflict(userId, startsAt, endsAt) {
+  const booking = await getDb()('bookings as bookings')
+    .join('spa_services as services', 'services.id', 'bookings.service_id')
+    .where('bookings.user_id', userId)
+    .whereIn('bookings.status', [bookingModel.statuses.PENDING, bookingModel.statuses.CONFIRMED])
+    .where('bookings.appointment_time', '<', endsAt)
+    .whereRaw(
+      "bookings.appointment_time + (services.duration_minutes * interval '1 minute') > ?",
+      [startsAt],
+    )
+    .first('bookings.id');
+
+  return Boolean(booking);
+}
+
 async function updatePaymentStatus(id, paymentStatus) {
   const db = getDb();
   const [booking] = await db(bookingModel.tableName)
@@ -113,6 +128,7 @@ module.exports = {
   create,
   findById,
   findDetailedById,
+  hasUserTimeConflict,
   list,
   listByUserId,
   updatePaymentStatus,

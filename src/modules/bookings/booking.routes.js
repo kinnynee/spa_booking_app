@@ -7,7 +7,9 @@ const { validate } = require('../../common/middlewares/validate.middleware');
 const { asyncHandler } = require('../../common/utils/async-handler');
 const {
   cancelBookingSchema,
+  bookingAvailabilitySchema,
   createBookingSchema,
+  createAdminBookingSchema,
   listBookingsSchema,
   updateBookingPaymentStatusSchema,
   updateBookingStatusSchema,
@@ -17,7 +19,18 @@ const router = Router();
 
 router.use(authenticate);
 
+router.get(
+  '/availability',
+  validate(bookingAvailabilitySchema),
+  asyncHandler(bookingController.getBookingAvailability),
+);
 router.post('/', validate(createBookingSchema), asyncHandler(bookingController.createBooking));
+router.post(
+  '/admin',
+  authorize(Roles.ADMIN),
+  validate(createAdminBookingSchema),
+  asyncHandler(bookingController.createAdminBooking),
+);
 router.get(
   '/',
   authorize(Roles.ADMIN),

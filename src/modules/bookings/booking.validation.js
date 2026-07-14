@@ -16,6 +16,26 @@ const createBookingSchema = z.object({
   query: z.object({}).passthrough(),
 });
 
+
+const createAdminBookingSchema = z.object({
+  body: z.object({
+    customerId: uuid,
+    serviceId: uuid,
+    appointmentTime: z.string().datetime(),
+    note: z.string().trim().max(500).optional(),
+  }),
+  params: z.object({}).passthrough(),
+  query: z.object({}).passthrough(),
+});
+
+const bookingAvailabilitySchema = z.object({
+  body: z.object({}).passthrough(),
+  params: z.object({}).passthrough(),
+  query: z.object({
+    serviceId: uuid,
+    appointmentTime: z.string().datetime(),
+  }),
+});
 const listBookingsSchema = z.object({
   body: z.object({}).passthrough(),
   params: z.object({}).passthrough(),
@@ -63,6 +83,8 @@ const updateBookingPaymentStatusSchema = z.object({
 
 module.exports = {
   cancelBookingSchema,
+  bookingAvailabilitySchema,
+  createAdminBookingSchema,
   createBookingSchema,
   listBookingsSchema,
   updateBookingPaymentStatusSchema,
