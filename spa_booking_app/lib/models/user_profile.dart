@@ -6,6 +6,7 @@ class UserProfile {
     required this.birthday,
     required this.gender,
     required this.avatar,
+    this.role = 'customer',
   });
 
   final String fullName;
@@ -14,6 +15,9 @@ class UserProfile {
   final String birthday;
   final String gender;
   final String avatar;
+  final String role;
+
+  bool get isAdmin => role.toLowerCase() == 'admin';
 
   factory UserProfile.fromApiJson(Map<String, dynamic> json) {
     final profile = json['profile'];
@@ -37,6 +41,7 @@ class UserProfile {
           profileMap['avatarUrl']?.toString() ??
           profileMap['avatar_url']?.toString() ??
           '',
+      role: json['role']?.toString() ?? 'customer',
     );
   }
 

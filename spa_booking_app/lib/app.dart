@@ -1,26 +1,33 @@
+// Thư viện Material dùng để cấu hình theme và MaterialApp.
 import 'package:flutter/material.dart';
+// Provider giúp đăng ký các ChangeNotifier dùng chung toàn app.
 import 'package:provider/provider.dart';
 
+// Import màu sắc thương hiệu và các provider/màn hình khởi động.
 import 'core/constants/app_colors.dart';
-import 'models/user_profile.dart';
+import 'providers/admin_booking_provider.dart';
+import 'providers/admin_category_provider.dart';
+import 'providers/admin_spa_service_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
+import 'providers/catalog_provider.dart';
 import 'screens/auth/auth_gate.dart';
-import 'screens/main_shell.dart';
 
+// Widget gốc chịu trách nhiệm cấu hình provider, theme và màn hình đầu tiên.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
+  // build dựng cây widget cấp cao nhất của ứng dụng.
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(
-            repository: _InMemoryAuthenticationRepository(),
-          ),
-        ),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AdminBookingProvider()),
+        ChangeNotifierProvider(create: (_) => AdminCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => AdminSpaServiceProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
+        ChangeNotifierProvider(create: (_) => CatalogProvider()),
       ],
       child: MaterialApp(
         title: 'Lavender Spa Booking',
@@ -47,85 +54,8 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: Builder(
-          builder: (context) {
-            final authProvider = context.read<AuthProvider>();
-            return AuthGate(
-              authProvider: authProvider,
-              authenticatedBuilder: (_) => const MainShell(),
-            );
-          },
-        ),
+        home: const AuthGate(),
       ),
     );
   }
-}
-
-class _InMemoryAuthenticationRepository implements AuthenticationRepository {
-  final Map<String, _LocalAccount> _accounts = {
-    'user@example.com': const _LocalAccount(
-      password: '123456',
-      profile: UserProfile(
-        id: 'demo-user',
-        email: 'user@example.com',
-        fullName: 'Nguyen An',
-        phoneNumber: '0901234567',
-      ),
-    ),
-  };
-
-  UserProfile? _currentUser;
-
-  @override
-  Future<UserProfile?> restoreSession() async {
-    return _currentUser;
-  }
-
-  @override
-  Future<UserProfile> signIn({
-    required String email,
-    required String password,
-  }) async {
-    final account = _accounts[email];
-
-    if (account == null || account.password != password) {
-      throw const AuthException('Email hoac mat khau khong chinh xac.');
-    }
-
-    _currentUser = account.profile;
-    return account.profile;
-  }
-
-  @override
-  Future<UserProfile> register({
-    required String fullName,
-    required String email,
-    required String password,
-  }) async {
-    if (_accounts.containsKey(email)) {
-      throw const AuthException('Email da duoc su dung.');
-    }
-
-    final profile = UserProfile(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      email: email,
-      fullName: fullName,
-    );
-
-    _accounts[email] = _LocalAccount(password: password, profile: profile);
-    _currentUser = profile;
-    return profile;
-  }
-
-  @override
-  Future<void> signOut() async {
-    _currentUser = null;
-  }
-}
-
-class _LocalAccount {
-  const _LocalAccount({required this.password, required this.profile});
-
-  final String password;
-  final UserProfile profile;
 }

@@ -1,7 +1,10 @@
+// Thư viện Material cung cấp Row, Icon và các widget layout cơ bản.
 import 'package:flutter/material.dart';
 
+// Import màu thương hiệu cho icon và chữ.
 import '../constants/app_colors.dart';
 
+// Widget hiển thị một dòng thông tin dạng icon + nhãn + giá trị.
 class InfoRow extends StatelessWidget {
   const InfoRow({
     super.key,
@@ -15,6 +18,7 @@ class InfoRow extends StatelessWidget {
   final String value;
 
   @override
+  // build dựng layout hai cột: icon bên trái, label/value bên phải.
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

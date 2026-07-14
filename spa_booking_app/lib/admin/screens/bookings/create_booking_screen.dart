@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/admin_colors.dart';
+import 'package:provider/provider.dart';
+
+import '../../../providers/admin_booking_provider.dart';
 import '../../core/constants/admin_text_styles.dart';
 import '../../models/admin_mock_data.dart';
 
@@ -27,6 +30,16 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<AdminBookingProvider>().loadBookingFormOptions();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _searchCtrl.dispose();
     _noteCtrl.dispose();
@@ -45,9 +58,20 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
   }
 
   bool _isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+  List<AdminCustomer> _matchingCustomers(List<AdminCustomer> customers) {
+    final query = _searchCtrl.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      return customers;
+    }
+    return customers
+        .where((customer) => customer.name.toLowerCase().contains(query) || customer.phone.toLowerCase().contains(query))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AdminBookingProvider>();
+    final customers = _matchingCustomers(provider.customers);
     return Scaffold(
       backgroundColor: AdminColors.background,
       appBar: AppBar(
@@ -69,6 +93,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
       bottomNavigationBar: _BottomBar(
         service: _selectedService,
         onSave: _onSave,
+        isSaving: provider.isCreating,
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
@@ -79,6 +104,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
           TextField(
             controller: _searchCtrl,
             style: AdminTextStyles.bodyLg,
+            onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: 'Tìm kiếm tên hoặc SĐT...',
               hintStyle: AdminTextStyles.bodyMd.copyWith(color: AdminColors.outline),
@@ -102,8 +128,8 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
           ),
           const SizedBox(height: 10),
           // Quick suggestions
-          if (_searchCtrl.text.isEmpty)
-            ...mockAdminCustomers.take(2).map((c) => _CustomerTile(
+          if (!provider.isLoadingFormOptions)
+            ...customers.take(5).map((c) => _CustomerTile(
                   customer: c,
                   selected: _selectedCustomer?.id == c.id,
                   onTap: () => setState(() => _selectedCustomer = c),
@@ -111,9 +137,9 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
           const SizedBox(height: 10),
           // Nút Thêm khách mới
           _OutlineButton(
-            icon: Icons.person_add_alt_1_rounded,
-            label: 'Thêm khách mới',
-            onTap: () {},
+            icon: Icons.refresh_rounded,
+            label: 'Tải lại khách hàng',
+            onTap: () => provider.loadBookingFormOptions(refresh: true),
           ),
 
           const SizedBox(height: 24),
@@ -123,7 +149,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
           const SizedBox(height: 10),
           _ServiceDropdown(
             selected: _selectedService,
-            services: mockAdminServices,
+            services: provider.services,
             onChanged: (s) => setState(() => _selectedService = s),
           ),
 
@@ -258,7 +284,7 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
     );
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     if (_selectedCustomer == null) {
       _showSnack('Vui lòng chọn khách hàng');
       return;
@@ -271,12 +297,35 @@ class _CreateBookingScreenState extends State<CreateBookingScreen> {
       _showSnack('Vui lòng chọn khung giờ');
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Đã lưu lịch hẹn thành công!'), backgroundColor: AdminColors.statusCompleted),
+    final provider = context.read<AdminBookingProvider>();
+    final booking = await provider.createBooking(
+      customerId: _selectedCustomer!.id,
+      serviceId: _selectedService!.id,
+      appointmentTime: _combineDateAndTime(_selectedDate, _selectedTime!),
+      note: _noteCtrl.text,
     );
-    Navigator.pop(context);
+
+    if (!mounted) {
+      return;
+    }
+    if (booking == null) {
+      _showSnack(provider.errorMessage ?? 'Không thể lưu lịch hẹn.');
+      return;
+    }
+    Navigator.pop(context, true);
+    return;
   }
 
+  DateTime _combineDateAndTime(DateTime date, String time) {
+    final parts = time.split(':');
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
+  }
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
@@ -402,9 +451,10 @@ class _OutlineButton extends StatelessWidget {
 }
 
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.service, required this.onSave});
+  const _BottomBar({required this.service, required this.isSaving, required this.onSave});
   final AdminService? service;
   final VoidCallback onSave;
+  final bool isSaving;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +478,7 @@ class _BottomBar extends StatelessWidget {
             const SizedBox(height: 12),
           ],
           GestureDetector(
-            onTap: onSave,
+            onTap: isSaving ? null : onSave,
             child: Container(
               height: 56,
               decoration: BoxDecoration(

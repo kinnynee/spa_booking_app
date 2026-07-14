@@ -160,16 +160,19 @@ class _BookingScreenState extends State<BookingScreen> {
       return;
     }
 
-    final success = await context.read<BookingProvider>().createBooking(
-      widget.service.id,
-      _selectedDate!,
-      _selectedTime!,
-      _noteController.text.trim(),
+    final provider = context.read<BookingProvider>();
+    final success = await provider.createBooking(
+      service: widget.service,
+      date: _selectedDate!,
+      time: _selectedTime!,
+      customerName: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      note: _noteController.text.trim(),
     );
 
     if (!success) {
       if (mounted) {
-        _showError(context.read<BookingProvider>().error ?? 'Lỗi đặt lịch');
+        _showError(provider.error ?? 'Lỗi đặt lịch');
       }
       return;
     }

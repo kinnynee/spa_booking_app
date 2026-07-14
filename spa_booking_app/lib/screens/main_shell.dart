@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
 import '../models/spa_service.dart';
-import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import 'appointments/appointments_screen.dart';
 import 'home/home_screen.dart';
@@ -26,7 +25,6 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<BookingProvider>(
       builder: (context, provider, _) {
-        final authProvider = context.watch<AuthProvider>();
         final pages = [
           HomeScreen(
             onOpenService: (service) => _openServiceDetail(context, service),
@@ -35,10 +33,7 @@ class MainShell extends StatelessWidget {
             onOpenService: (service) => _openServiceDetail(context, service),
           ),
           const AppointmentsScreen(),
-          ProfileScreen(
-            authProvider: authProvider,
-            onAppointments: () => provider.setCurrentTab(2),
-          ),
+          const ProfileScreen(),
         ];
 
         return Scaffold(

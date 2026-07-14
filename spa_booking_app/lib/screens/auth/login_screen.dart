@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
+import '../../core/config/google_auth_config.dart';
 import '../../core/network/api_client.dart';
+import '../../core/widgets/google_sign_in_button.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../providers/auth_provider.dart';
 import 'register_screen.dart';
@@ -22,7 +24,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _accountController = TextEditingController(text: 'admin@spa.local');
+  final _accountController = TextEditingController(text: 'admin@local.spa');
   final _passwordController = TextEditingController(text: 'Admin@12345');
   bool _hidePassword = true;
 
@@ -64,18 +66,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   TextFormField(
                     controller: _accountController,
-                    keyboardType: TextInputType.emailAddress,
+                    keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
                       hintText: 'Email',
                       prefixIcon: Icon(Icons.mail_outline),
                     ),
                     validator: (value) {
-                      final email = value?.trim() ?? '';
-                      if (email.isEmpty) {
+                      final account = value?.trim() ?? '';
+                      if (account.isEmpty) {
                         return 'Vui lòng nhập email';
                       }
-                      if (!email.contains('@')) {
+                      if (!account.contains('@')) {
                         return 'Email không hợp lệ';
                       }
                       return null;
@@ -131,6 +133,47 @@ class _LoginScreenState extends State<LoginScreen> {
               icon: Icons.login,
               onPressed: auth.isLoading ? null : _submit,
             ),
+            if (GoogleAuthConfig.isSupportedOnCurrentPlatform) ...[
+              const SizedBox(height: 22),
+              const Row(
+                children: [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('ho\u1eb7c'),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: 18),
+              GoogleSignInButton(
+                onPressed: auth.isLoading
+                    ? null
+                    : () async {
+                        final success = await context
+                            .read<AuthProvider>()
+                            .loginWithGoogle();
+                        if (!context.mounted || success) {
+                          return;
+                        }
+                        final message =
+                            context.read<AuthProvider>().errorMessage ??
+                            '\u0110\u0103ng nh\u1eadp Google th\u1ea5t b\u1ea1i. Vui l\u00f2ng th\u1eed l\u1ea1i.';
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(message)));
+                      },
+                isLoading: auth.isLoading,
+              ),
+              if (auth.errorMessage != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  auth.errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ],
+            ],
             const SizedBox(height: 22),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

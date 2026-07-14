@@ -1,9 +1,12 @@
+// Thư viện Material cung cấp widget, icon, màu và button cho card.
 import 'package:flutter/material.dart';
 
+// Import model lịch hẹn, hàm format/status và màu dùng trong card.
 import '../../models/appointment.dart';
 import '../../providers/booking_provider.dart';
 import '../constants/app_colors.dart';
 
+// Card hiển thị một lịch hẹn, bao gồm trạng thái, thời gian, giá và nút hủy.
 class AppointmentCard extends StatelessWidget {
   const AppointmentCard({
     super.key,
@@ -12,9 +15,10 @@ class AppointmentCard extends StatelessWidget {
   });
 
   final Appointment appointment;
-  final VoidCallback onCancel;
+  final VoidCallback? onCancel;
 
   @override
+  // build dựng phần giao diện của widget lịch hẹn.
   Widget build(BuildContext context) {
     final statusColor = _statusColor(appointment.status);
 
@@ -105,6 +109,7 @@ class AppointmentCard extends StatelessWidget {
     );
   }
 
+  // Đổi trạng thái lịch hẹn sang màu tương ứng trên badge.
   Color _statusColor(AppointmentStatus status) {
     switch (status) {
       case AppointmentStatus.pending:
@@ -119,6 +124,7 @@ class AppointmentCard extends StatelessWidget {
   }
 }
 
+// Dòng thông tin nhỏ có icon bên trái và nội dung bên phải.
 class _SmallLine extends StatelessWidget {
   const _SmallLine({required this.icon, required this.text});
 
@@ -126,6 +132,7 @@ class _SmallLine extends StatelessWidget {
   final String text;
 
   @override
+  // build dựng phần giao diện của widget lịch hẹn.
   Widget build(BuildContext context) {
     return Row(
       children: [

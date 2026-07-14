@@ -1,7 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/appointment.dart';
 import '../data/api/booking_api_service.dart';
+import '../models/appointment.dart';
+import '../models/spa_service.dart';
 
 class BookingProvider with ChangeNotifier {
   final BookingApiService _apiService = BookingApiService();
@@ -39,17 +40,39 @@ class BookingProvider with ChangeNotifier {
     }
   }
 
-  // Create new booking
-  Future<bool> createBooking(String serviceId, DateTime date, String time, String note) async {
+  // Create a booking with the current API contract and update local state.
+  Future<bool> createBooking({
+    required SpaService service,
+    required DateTime date,
+    required String time,
+    required String customerName,
+    required String phone,
+    required String note,
+  }) async {
+    final parts = time.split(':');
+    final hour = int.tryParse(parts.first) ?? 0;
+    final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+    final appointmentTime = DateTime(date.year, date.month, date.day, hour, minute);
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
-      final newBooking = await _apiService.createBooking(serviceId, date, time, note);
+      final newBooking = await _apiService.createBooking(
+        service: service,
+        appointmentTime: appointmentTime,
+        customerName: customerName,
+        phone: phone,
+        note: note,
+      );
       _bookings.insert(0, newBooking);
-      notifyListeners();
       return true;
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+    } catch (error) {
+      _error = error.toString();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -72,7 +95,7 @@ class BookingProvider with ChangeNotifier {
 }
 
 String formatMoney(int amount) {
-  return 'đ';
+  return '${NumberFormat('#,###', 'vi_VN').format(amount).replaceAll(',', '.')}\u0111';
 }
 
 String formatDate(DateTime date) {
