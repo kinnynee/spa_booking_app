@@ -14,9 +14,35 @@ async function findByGoogleSubject(googleSubject) {
 }
 
 async function list({ limit = 50, offset = 0 } = {}) {
-  return getDb()(userModel.tableName)
-    .select('id', 'full_name', 'email', 'phone', 'role', 'is_active', 'created_at')
-    .orderBy('created_at', 'desc')
+  const db = getDb();
+
+  return db('users as users')
+    .leftJoin('bookings as bookings', 'bookings.user_id', 'users.id')
+    .select(
+      'users.id',
+      'users.full_name',
+      'users.email',
+      'users.phone',
+      'users.role',
+      'users.is_active',
+      'users.created_at',
+      db.raw(
+        "count(bookings.id) filter (where bookings.status <> 'cancelled')::int as total_bookings",
+      ),
+      db.raw(
+        "coalesce(sum(bookings.total_price) filter (where bookings.status <> 'cancelled' and bookings.payment_status = 'paid'), 0)::bigint as total_spent",
+      ),
+    )
+    .groupBy(
+      'users.id',
+      'users.full_name',
+      'users.email',
+      'users.phone',
+      'users.role',
+      'users.is_active',
+      'users.created_at',
+    )
+    .orderBy('users.created_at', 'desc')
     .limit(limit)
     .offset(offset);
 }
