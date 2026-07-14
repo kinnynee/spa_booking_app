@@ -12,6 +12,7 @@ function toSpaServiceDto(service) {
     durationMinutes: service.duration_minutes,
     imageUrl: service.image_url,
     isPopular: service.is_popular,
+    isActive: service.is_active,
     category: service.category_name
       ? {
           id: service.category_id,
