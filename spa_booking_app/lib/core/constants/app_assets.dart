@@ -12,25 +12,36 @@ class AppAssets {
 
   // Ảnh online minh họa cho từng nhóm dịch vụ spa trong dữ liệu mẫu.
   static const String massage =
-      'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_massage.jpg';
   static const String facial =
-      'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_cham_soc_da_chuyensau.jpg';
   static const String hairWash =
-      'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_goidau.jpg';
   static const String hotStone =
-      'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_trilieu_huongthom.jpg';
   static const String acneCare =
-      'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_trimun.jpg';
   static const String bodyScrub =
-      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_cham__soc.jpg';
   static const String aromatherapy =
-      'https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_trilieu_huongthom.jpg';
   static const String nail =
-      'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_duong_nail.jpg';
   static const String waxing =
-      'https://images.unsplash.com/photo-1607008829749-c0f284a49828?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_waxing.jpg';
   static const String coupleSpa =
-      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80';
+      'assets/images/img_massage.jpg';
   static const String userAvatar =
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80';
-}
+
+  static String serviceImageFor({String? categorySlug, String? name}) {
+    final slug = (categorySlug ?? '').toLowerCase();
+    final label = (name ?? '').toLowerCase();
+    if (slug.contains('skin') || slug.contains('facial') || label.contains('facial')) return facial;
+    if (slug.contains('massage') || label.contains('massage')) return massage;
+    if (slug.contains('treatment') || slug.contains('tri') || label.contains('stone')) return hotStone;
+    if (slug.contains('nail') || label.contains('nail')) return nail;
+    if (slug.contains('hair') || label.contains('hair')) return hairWash;
+    if (slug.contains('wax') || label.contains('wax')) return waxing;
+    return massage;
+  }}

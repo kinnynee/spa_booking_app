@@ -20,6 +20,7 @@ class BookingProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _loaded = false;
   String? _errorMessage;
+  int _loadRequestId = 0;
 
   // Getter trả bản read-only để màn hình không sửa trực tiếp list private.
   List<Appointment> get appointments => List.unmodifiable(_appointments);
@@ -40,15 +41,22 @@ class BookingProvider extends ChangeNotifier {
       return;
     }
 
+    final requestId = ++_loadRequestId;
     _setLoading(true);
     try {
       final bookings = await _apiService.fetchMyBookings();
+      if (requestId != _loadRequestId) {
+        return;
+      }
       _appointments
         ..clear()
         ..addAll(bookings);
       _errorMessage = null;
       _loaded = true;
     } catch (error) {
+      if (requestId != _loadRequestId) {
+        return;
+      }
       _errorMessage = _messageFrom(error, 'Không thể tải lịch hẹn.');
     } finally {
       _setLoading(false);
@@ -73,6 +81,8 @@ class BookingProvider extends ChangeNotifier {
         customerName: customerName,
         phone: phone,
       );
+      // Do not let an older in-flight list request clear this new item.
+      _loadRequestId++;
       _appointments.insert(0, appointment);
       _errorMessage = null;
       _loaded = true;

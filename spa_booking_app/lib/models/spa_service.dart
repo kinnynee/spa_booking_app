@@ -1,3 +1,5 @@
+import '../core/constants/app_assets.dart';
+
 // Model này được dùng bởi mock_services.dart, ServiceCard, HomeScreen,
 // ServicesScreen và ServiceDetailScreen.
 // Class dữ liệu bất biến: các field final giúp thông tin dịch vụ không bị đổi tùy tiện.
@@ -68,8 +70,7 @@ class SpaService {
       durationMinutes: _asInt(
         json['durationMinutes'] ?? json['duration_minutes'],
       ),
-      image:
-          json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? '',
+      image: _resolveImage(json, categorySlug),
       rating: _asDouble(json['rating']) ?? (isPopular ? 4.8 : 4.6),
       isPopular: isPopular,
       tag: json['tag']?.toString() ?? (isPopular ? 'Phổ biến' : ''),
@@ -81,6 +82,17 @@ class SpaService {
   }
 
   // Hàm phụ đổi dữ liệu bất kỳ sang int an toàn.
+  static String _resolveImage(Map<String, dynamic> json, String? categorySlug) {
+    final remote = json['imageUrl']?.toString() ?? json['image_url']?.toString() ?? '';
+    if (remote.trim().isNotEmpty) return remote;
+    final slug = (categorySlug ?? '').toLowerCase();
+    if (slug.contains('skin') || slug.contains('facial')) return AppAssets.facial;
+    if (slug.contains('treatment') || slug.contains('massage')) return AppAssets.massage;
+    if (slug.contains('nail')) return AppAssets.nail;
+    if (slug.contains('hair')) return AppAssets.hairWash;
+    if (slug.contains('wax')) return AppAssets.waxing;
+    return AppAssets.massage;
+  }
   static int _asInt(Object? value) {
     if (value is int) {
       return value;

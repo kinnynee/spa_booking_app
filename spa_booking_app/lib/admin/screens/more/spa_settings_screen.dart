@@ -1,420 +1,276 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../core/constants/admin_colors.dart';
 import '../../core/constants/admin_text_styles.dart';
-import '../../core/widgets/admin_app_bar.dart';
 
-class SpaSettingsScreen extends StatefulWidget {
+class SpaSettingsScreen extends StatelessWidget {
   const SpaSettingsScreen({super.key});
-
-  @override
-  State<SpaSettingsScreen> createState() => _SpaSettingsScreenState();
-}
-
-class _SpaSettingsScreenState extends State<SpaSettingsScreen> {
-  final _spaNameCtrl = TextEditingController(text: 'Lavender Spa');
-  final _addressCtrl = TextEditingController(
-    text: '24 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh',
-  );
-  final _hotlineCtrl = TextEditingController(text: '090 123 4567');
-  final _emailCtrl = TextEditingController(text: 'hello@lavenderspa.vn');
-  final _cancelHoursCtrl = TextEditingController(text: '2');
-
-  final List<String> _days = const [
-    'Thứ 2',
-    'Thứ 3',
-    'Thứ 4',
-    'Thứ 5',
-    'Thứ 6',
-    'Thứ 7',
-    'Chủ nhật',
-  ];
-
-  late final Map<String, bool> _openByDay;
-
-  @override
-  void initState() {
-    super.initState();
-    _openByDay = {for (final day in _days) day: true};
-  }
-
-  @override
-  void dispose() {
-    _spaNameCtrl.dispose();
-    _addressCtrl.dispose();
-    _hotlineCtrl.dispose();
-    _emailCtrl.dispose();
-    _cancelHoursCtrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AdminColors.background,
-      appBar: const AdminAppBar(title: 'Cài đặt Spa', showBackButton: true),
-      bottomNavigationBar: _SaveSettingsBar(onSave: _saveSettings),
+      appBar: AppBar(
+        backgroundColor: AdminColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AdminColors.primary,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text('Cài đặt Spa', style: AdminTextStyles.titleLg),
+        centerTitle: true,
+      ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+        padding: const EdgeInsets.all(20),
         children: [
-          const _SectionHeader(
-            icon: Icons.storefront_rounded,
-            label: 'THÔNG TIN TIỆM',
-          ),
-          const SizedBox(height: 10),
-          _SettingsCard(
+          // Thông tin tiệm
+          Row(
             children: [
-              TextField(
-                controller: _spaNameCtrl,
-                style: AdminTextStyles.bodyMd,
-                textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration('Tên Spa', Icons.spa_rounded),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _addressCtrl,
-                style: AdminTextStyles.bodyMd,
-                textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration(
-                  'Địa chỉ',
-                  Icons.location_on_outlined,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _hotlineCtrl,
-                style: AdminTextStyles.bodyMd,
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration('Hotline', Icons.call_outlined),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _emailCtrl,
-                style: AdminTextStyles.bodyMd,
-                keyboardType: TextInputType.emailAddress,
-                decoration: _fieldDecoration(
-                  'Email',
-                  Icons.mail_outline_rounded,
-                ),
-              ),
+              const Icon(Icons.storefront_rounded, color: AdminColors.primary),
+              const SizedBox(width: 8),
+              Text('THÔNG TIN TIỆM', style: AdminTextStyles.labelLg),
             ],
           ),
-          const SizedBox(height: 22),
-          const _SectionHeader(
-            icon: Icons.schedule_rounded,
-            label: 'GIỜ HOẠT ĐỘNG',
+          const SizedBox(height: 16),
+          _SettingsTextField(label: 'Tên Spa', initialValue: 'Lavender Spa'),
+          const SizedBox(height: 16),
+          _SettingsTextField(
+            label: 'Địa chỉ',
+            initialValue: '123 Đường ABC, Quận 1, TP.HCM',
           ),
-          const SizedBox(height: 10),
-          _SettingsCard(
+          const SizedBox(height: 16),
+          _SettingsTextField(label: 'Hotline', initialValue: '0123 456 789'),
+          const SizedBox(height: 16),
+          _SettingsTextField(
+            label: 'Email',
+            initialValue: 'contact@lavenderspa.vn',
+          ),
+          const SizedBox(height: 32),
+
+          // Giờ hoạt động
+          Row(
             children: [
-              for (var index = 0; index < _days.length; index++) ...[
-                _BusinessHourRow(
-                  day: _days[index],
-                  weekend: index >= 5,
-                  enabled: _openByDay[_days[index]] ?? true,
-                  onChanged: (value) {
-                    setState(() => _openByDay[_days[index]] = value);
-                  },
+              const Icon(Icons.access_time_rounded, color: AdminColors.primary),
+              const SizedBox(width: 8),
+              Text('GIỜ HOẠT ĐỘNG', style: AdminTextStyles.labelLg),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: AdminColors.surfaceWhite,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: AdminColors.ambientShadow,
+            ),
+            child: Column(
+              children: [
+                _OperatingHourRow(
+                  day: 'Thứ 2',
+                  time: '09:00 - 21:00',
+                  isActive: true,
                 ),
-                if (index != _days.length - 1) const _SettingsDivider(),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _OperatingHourRow(
+                  day: 'Thứ 3',
+                  time: '09:00 - 21:00',
+                  isActive: true,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _OperatingHourRow(
+                  day: 'Thứ 4',
+                  time: '09:00 - 21:00',
+                  isActive: true,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _OperatingHourRow(
+                  day: 'Thứ 5',
+                  time: '09:00 - 21:00',
+                  isActive: true,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _OperatingHourRow(
+                  day: 'Thứ 6',
+                  time: '09:00 - 21:00',
+                  isActive: true,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _OperatingHourRow(
+                  day: 'Thứ 7',
+                  time: '09:00 - 21:00',
+                  isActive: true,
+                  isWeekend: true,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _OperatingHourRow(
+                  day: 'Chủ Nhật',
+                  time: '09:00 - 21:00',
+                  isActive: false,
+                  isWeekend: true,
+                ),
               ],
-            ],
+            ),
           ),
-          const SizedBox(height: 22),
-          const _SectionHeader(
-            icon: Icons.verified_user_outlined,
-            label: 'CHÍNH SÁCH ĐẶT LỊCH',
-          ),
-          const SizedBox(height: 10),
-          _SettingsCard(
+          const SizedBox(height: 32),
+
+          // Chính sách đặt lịch
+          Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: AdminColors.secondaryFixed,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(
-                      Icons.event_busy_rounded,
-                      color: AdminColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Hủy lịch trước', style: AdminTextStyles.titleMd),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Khoảng thời gian tối thiểu để khách hủy lịch',
-                          style: AdminTextStyles.bodySm,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  SizedBox(
-                    width: 84,
-                    child: TextField(
-                      controller: _cancelHoursCtrl,
-                      style: AdminTextStyles.titleMd,
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: _smallFieldDecoration('giờ'),
-                    ),
-                  ),
-                ],
-              ),
+              const Icon(Icons.shield_outlined, color: AdminColors.primary),
+              const SizedBox(width: 8),
+              Text('CHÍNH SÁCH ĐẶT LỊCH', style: AdminTextStyles.labelLg),
             ],
           ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AdminColors.surfaceWhite,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: AdminColors.ambientShadow,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Cho phép hủy lịch trước (giờ)',
+                    style: AdminTextStyles.titleMd,
+                  ),
+                ),
+                SizedBox(
+                  width: 60,
+                  child: TextField(
+                    controller: TextEditingController(text: '2'),
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          // Submit
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            style: FilledButton.styleFrom(
+              backgroundColor: AdminColors.primary,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+            child: Text(
+              'Lưu thay đổi',
+              style: AdminTextStyles.titleMd.copyWith(color: Colors.white),
+            ),
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
-
-  InputDecoration _fieldDecoration(String label, IconData icon) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: AdminTextStyles.bodyMd.copyWith(color: AdminColors.outline),
-      prefixIcon: Icon(icon, color: AdminColors.outline, size: 20),
-      filled: true,
-      fillColor: AdminColors.surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AdminColors.primary, width: 1.5),
-      ),
-    );
-  }
-
-  InputDecoration _smallFieldDecoration(String suffix) {
-    return InputDecoration(
-      suffixText: suffix,
-      suffixStyle: AdminTextStyles.bodySm,
-      filled: true,
-      fillColor: AdminColors.surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AdminColors.primary, width: 1.5),
-      ),
-    );
-  }
-
-  void _saveSettings() {
-    if (_spaNameCtrl.text.trim().isEmpty) {
-      _showSnack('Vui lòng nhập tên spa');
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã lưu cài đặt spa!'),
-        backgroundColor: AdminColors.statusCompleted,
-      ),
-    );
-  }
-
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.icon, required this.label});
-
-  final IconData icon;
+class _SettingsTextField extends StatelessWidget {
+  const _SettingsTextField({required this.label, required this.initialValue});
   final String label;
+  final String initialValue;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: AdminColors.primary),
-        const SizedBox(width: 8),
-        Text(label, style: AdminTextStyles.labelLg),
+        Text(
+          label,
+          style: AdminTextStyles.bodyMd.copyWith(
+            color: AdminColors.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: TextEditingController(text: initialValue),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AdminColors.surfaceWhite,
+            contentPadding: const EdgeInsets.all(16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: AdminColors.surfaceContainerHigh,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: AdminColors.surfaceContainerHigh,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AdminColors.primary),
+            ),
+          ),
+        ),
       ],
     );
   }
 }
 
-class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AdminColors.surfaceWhite,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AdminColors.ambientShadow,
-      ),
-      child: Column(children: children),
-    );
-  }
-}
-
-class _BusinessHourRow extends StatelessWidget {
-  const _BusinessHourRow({
+class _OperatingHourRow extends StatelessWidget {
+  const _OperatingHourRow({
     required this.day,
-    required this.weekend,
-    required this.enabled,
-    required this.onChanged,
+    required this.time,
+    required this.isActive,
+    this.isWeekend = false,
   });
-
   final String day;
-  final bool weekend;
-  final bool enabled;
-  final ValueChanged<bool> onChanged;
+  final String time;
+  final bool isActive;
+  final bool isWeekend;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           SizedBox(
-            width: 76,
+            width: 80,
             child: Text(
               day,
-              style: AdminTextStyles.titleMd.copyWith(
-                color: weekend ? AdminColors.primary : AdminColors.onSurface,
+              style: AdminTextStyles.bodyLg.copyWith(
+                color: isWeekend ? AdminColors.primary : AdminColors.onSurface,
+                fontWeight: isWeekend ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ),
-          const SizedBox(width: 10),
           Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-              decoration: BoxDecoration(
-                color: enabled
-                    ? AdminColors.surfaceContainerLow
-                    : AdminColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(99),
+            child: Text(
+              time,
+              style: AdminTextStyles.bodyMd.copyWith(
+                color: isActive ? AdminColors.onSurface : AdminColors.outline,
+                decoration: isActive
+                    ? TextDecoration.none
+                    : TextDecoration.lineThrough,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    enabled
-                        ? Icons.access_time_rounded
-                        : Icons.do_not_disturb_on_outlined,
-                    size: 16,
-                    color: enabled ? AdminColors.primary : AdminColors.outline,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      enabled ? '09:00 - 21:00' : 'Nghỉ',
-                      style: AdminTextStyles.bodySm.copyWith(
-                        color: enabled
-                            ? AdminColors.onSurfaceVariant
-                            : AdminColors.outline,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
+              textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(width: 8),
           Switch(
-            value: enabled,
+            value: isActive,
+            onChanged: (v) {},
             activeThumbColor: AdminColors.primary,
-            onChanged: onChanged,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SettingsDivider extends StatelessWidget {
-  const _SettingsDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Divider(height: 14, color: AdminColors.surfaceContainerHigh);
-  }
-}
-
-class _SaveSettingsBar extends StatelessWidget {
-  const _SaveSettingsBar({required this.onSave});
-
-  final VoidCallback onSave;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-      decoration: BoxDecoration(
-        color: AdminColors.surfaceWhite,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: GestureDetector(
-          onTap: onSave,
-          child: Container(
-            height: 56,
-            decoration: BoxDecoration(
-              color: AdminColors.primary,
-              borderRadius: BorderRadius.circular(99),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Lưu thay đổi',
-                  style: AdminTextStyles.titleMd.copyWith(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

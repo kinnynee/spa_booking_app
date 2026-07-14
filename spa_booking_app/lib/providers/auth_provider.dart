@@ -1,18 +1,28 @@
 // foundation cung cấp ChangeNotifier để phát tín hiệu rebuild cho UI.
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 // Import ApiClient để lưu token và AuthApiService để gọi backend thật.
 import '../core/network/api_client.dart';
+import '../data/auth/google_auth_service.dart';
 import '../data/api/auth_api_service.dart';
 import '../data/mock_user.dart';
 import '../models/user_profile.dart';
 
 // Provider quản lý trạng thái đăng nhập, user hiện tại và token phiên làm việc.
 class AuthProvider extends ChangeNotifier {
-  AuthProvider({AuthApiService? apiService})
-    : _apiService = apiService ?? AuthApiService();
+  AuthProvider({
+    AuthApiService? apiService,
+    GoogleAuthService? googleAuthService,
+  }) : _apiService = apiService ?? AuthApiService(),
+       _googleAuthService = googleAuthService ?? GoogleAuthService() {
+    unawaited(_listenForWebGoogleSignIn());
+  }
 
   final AuthApiService _apiService;
+  final GoogleAuthService _googleAuthService;
+  StreamSubscription<String>? _webGoogleTokenSubscription;
 
   bool _isAuthenticated = false;
   bool _isLoading = false;
@@ -26,6 +36,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   UserProfile get currentUser => _currentUser;
+  bool get isAdmin => _isAuthenticated && _currentUser.isAdmin;
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
 
@@ -37,7 +48,7 @@ class AuthProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       final session = await _apiService.login(
-        email: account.trim(),
+        account: account.trim(),
         password: password,
       );
       _applySession(session);
@@ -76,6 +87,22 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Xóa lỗi hiện tại để form có thể ẩn thông báo cũ.
+  Future<bool> loginWithGoogle() async {
+    _setLoading(true);
+    try {
+      final idToken = await _googleAuthService.signInInteractively();
+      final session = await _apiService.loginWithGoogle(idToken: idToken);
+      _applySession(session);
+      return true;
+    } catch (error) {
+      _errorMessage = _messageFrom(error, 'Google sign-in failed.');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Clears the current authentication error.
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -87,10 +114,45 @@ class AuthProvider extends ChangeNotifier {
     _accessToken = null;
     _refreshToken = null;
     ApiClient.instance.setAccessToken(null);
+    unawaited(_googleAuthService.signOut());
     notifyListeners();
   }
 
   // Gán user/token thật từ backend rồi lưu access token cho các API tiếp theo.
+  Future<void> _listenForWebGoogleSignIn() async {
+    try {
+      await _googleAuthService.initialize();
+      _webGoogleTokenSubscription = _googleAuthService.webIdTokens.listen(
+        _loginWithGoogleIdToken,
+        onError: (Object error, StackTrace stackTrace) {
+          if (_isLoading) {
+            return;
+          }
+          _errorMessage = _messageFrom(error, 'Google sign-in failed.');
+          notifyListeners();
+        },
+      );
+    } catch (_) {
+      // The button action displays the configuration error when relevant.
+    }
+  }
+
+  Future<void> _loginWithGoogleIdToken(String idToken) async {
+    if (_isLoading) {
+      return;
+    }
+
+    _setLoading(true);
+    try {
+      final session = await _apiService.loginWithGoogle(idToken: idToken);
+      _applySession(session);
+    } catch (error) {
+      _errorMessage = _messageFrom(error, 'Google sign-in failed.');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void _applySession(AuthSession session) {
     _currentUser = session.user;
     _accessToken = session.accessToken;
@@ -114,5 +176,12 @@ class AuthProvider extends ChangeNotifier {
   String _messageFrom(Object error, String fallback) {
     final message = error.toString().trim();
     return message.isEmpty ? fallback : message;
+  }
+
+  @override
+  void dispose() {
+    _webGoogleTokenSubscription?.cancel();
+    _googleAuthService.dispose();
+    super.dispose();
   }
 }

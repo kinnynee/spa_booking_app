@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 
 // Import màu sắc thương hiệu và các provider/màn hình khởi động.
 import 'core/constants/app_colors.dart';
+import 'providers/admin_booking_provider.dart';
+import 'providers/admin_category_provider.dart';
+import 'providers/admin_spa_service_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
 import 'providers/catalog_provider.dart';
@@ -20,6 +23,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AdminBookingProvider()),
+        ChangeNotifierProvider(create: (_) => AdminCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => AdminSpaServiceProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => CatalogProvider()),
       ],

@@ -9,4 +9,5 @@ const UserProfile mockUser = UserProfile(
   birthday: '01/01/2005',
   gender: 'Nam',
   avatar: '',
+  role: 'admin',
 );

@@ -1,4 +1,3 @@
-// Model hồ sơ người dùng đang đăng nhập.
 class UserProfile {
   const UserProfile({
     required this.fullName,
@@ -7,22 +6,19 @@ class UserProfile {
     required this.birthday,
     required this.gender,
     required this.avatar,
+    this.role = 'customer',
   });
 
-  // Họ tên hiển thị trên trang chủ và hồ sơ.
   final String fullName;
-  // Email đăng nhập/liên hệ của người dùng.
   final String email;
-  // Số điện thoại dùng khi đặt lịch.
   final String phone;
-  // Ngày sinh dạng chuỗi hiển thị, có fallback nếu API chưa có.
   final String birthday;
-  // Giới tính đã được chuyển sang nhãn tiếng Việt.
   final String gender;
-  // URL ảnh đại diện; rỗng thì UI dùng avatar mặc định.
   final String avatar;
+  final String role;
 
-  // Chuyển JSON user/profile từ backend thành UserProfile an toàn cho UI.
+  bool get isAdmin => role.toLowerCase() == 'admin';
+
   factory UserProfile.fromApiJson(Map<String, dynamic> json) {
     final profile = json['profile'];
     final profileMap = profile is Map<String, dynamic>
@@ -45,10 +41,10 @@ class UserProfile {
           profileMap['avatarUrl']?.toString() ??
           profileMap['avatar_url']?.toString() ??
           '',
+      role: json['role']?.toString() ?? 'customer',
     );
   }
 
-  // Chuẩn hóa giá trị gender từ API sang nhãn tiếng Việt.
   static String _genderLabel(String? value) {
     switch (value) {
       case 'male':

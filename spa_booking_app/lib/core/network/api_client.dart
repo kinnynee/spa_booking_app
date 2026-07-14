@@ -65,6 +65,58 @@ class ApiClient {
     return _request<T>('POST', path, body: body);
   }
 
+  Future<T> postBinary<T>(
+    String path, {
+    required List<int> bytes,
+    required String contentType,
+  }) async {
+    final uri = _uri(path, const {});
+    final request = http.Request('POST', uri);
+    request.headers.addAll({
+      'Accept': 'application/json',
+      'Content-Type': contentType,
+      if (hasToken) 'Authorization': 'Bearer $_accessToken',
+    });
+    request.bodyBytes = bytes;
+
+    late http.Response response;
+    try {
+      final streamed = await _http.send(request);
+      response = await http.Response.fromStream(streamed)
+          .timeout(const Duration(seconds: 20));
+    } on TimeoutException {
+      throw const ApiException(
+        'Kh?ng th? t?i ?nh l?n. Vui l?ng th? l?i.',
+      );
+    } catch (_) {
+      throw const ApiException(
+        'Kh?ng th? t?i ?nh l?n. Vui l?ng ki?m tra API server.',
+      );
+    }
+
+    final decoded = _decode(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      if (response.statusCode >= 500) {
+        throw ApiException(
+          'M?y ch? g?p l?i khi t?i ?nh l?n.',
+          statusCode: response.statusCode,
+        );
+      }
+      throw ApiException(
+        _messageFrom(decoded) ?? 'Kh?ng th? t?i ?nh l?n.',
+        statusCode: response.statusCode,
+      );
+    }
+
+    if (decoded is Map<String, dynamic>) {
+      if (decoded['success'] == false) {
+        throw ApiException(_messageFrom(decoded) ?? 'Kh?ng th? t?i ?nh l?n.');
+      }
+      return decoded['data'] as T;
+    }
+    return decoded as T;
+  }
+
   // Gửi request PUT với body JSON.
   Future<T> put<T>(String path, {Map<String, dynamic>? body}) {
     return _request<T>('PUT', path, body: body);

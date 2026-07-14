@@ -1,8 +1,6 @@
-// Import ApiClient để gọi endpoint auth và UserProfile để parse user trả về.
 import '../../core/network/api_client.dart';
 import '../../models/user_profile.dart';
 
-// Dữ liệu phiên đăng nhập gồm user và cặp access/refresh token.
 class AuthSession {
   const AuthSession({
     required this.user,
@@ -15,25 +13,30 @@ class AuthSession {
   final String refreshToken;
 }
 
-// Service đóng gói các API liên quan đăng nhập và đăng ký.
 class AuthApiService {
   AuthApiService({ApiClient? client}) : _client = client ?? ApiClient.instance;
 
   final ApiClient _client;
 
-  // Gọi API đăng nhập bằng email/password và trả về AuthSession.
   Future<AuthSession> login({
-    required String email,
+    required String account,
     required String password,
   }) async {
     final data = await _client.post<Map<String, dynamic>>(
       '/auth/login',
-      body: {'email': email, 'password': password},
+      body: {'email': account, 'password': password},
     );
     return _sessionFrom(data);
   }
 
-  // Gọi API đăng ký tài khoản mới và trả về AuthSession.
+  Future<AuthSession> loginWithGoogle({required String idToken}) async {
+    final data = await _client.post<Map<String, dynamic>>(
+      '/auth/google',
+      body: {'idToken': idToken},
+    );
+    return _sessionFrom(data);
+  }
+
   Future<AuthSession> register({
     required String fullName,
     required String email,
@@ -52,7 +55,6 @@ class AuthApiService {
     return _sessionFrom(data);
   }
 
-  // Parse payload auth chung để tránh lặp code ở login/register.
   AuthSession _sessionFrom(Map<String, dynamic> data) {
     return AuthSession(
       user: UserProfile.fromApiJson(
