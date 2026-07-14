@@ -3,7 +3,7 @@ const logger = require('../logger/logger');
 const config = require('../../config/env');
 
 function errorHandler(error, req, res, _next) {
-  const statusCode = error.statusCode || 500;
+  const statusCode = error.statusCode || error.status || 500;
   const isServerError = statusCode >= 500;
   const response = {
     success: false,

@@ -30,6 +30,7 @@ const envSchema = z.object({
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
   LOG_LEVEL: z.string().default('info'),
   FIREBASE_PROJECT_ID: z.preprocess(emptyToUndefined, z.string().optional()),
+  GOOGLE_OAUTH_CLIENT_ID: z.preprocess(emptyToUndefined, z.string().optional()),
   FIREBASE_SERVICE_ACCOUNT_PATH: z.preprocess(emptyToUndefined, z.string().optional()),
   FIREBASE_CLIENT_EMAIL: z.preprocess(emptyToUndefined, z.string().email().optional()),
   FIREBASE_PRIVATE_KEY: z.preprocess(emptyToUndefined, z.string().optional()),
@@ -99,6 +100,9 @@ module.exports = {
   },
   logging: {
     level: env.LOG_LEVEL,
+  },
+  google: {
+    oauthClientId: env.GOOGLE_OAUTH_CLIENT_ID,
   },
   firebase: {
     projectId: env.FIREBASE_PROJECT_ID,

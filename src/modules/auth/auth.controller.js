@@ -7,6 +7,11 @@ async function register(req, res) {
   return sendCreated(res, result, 'Registration successful.');
 }
 
+async function googleLogin(req, res) {
+  const result = await authService.loginWithGoogle(req.validated.body.idToken);
+  return sendSuccess(res, result, 'Google login successful.');
+}
+
 async function login(req, res) {
   const result = await authService.login(req.validated.body);
   return sendSuccess(res, result, 'Login successful.');
@@ -18,6 +23,7 @@ async function me(req, res) {
 
 module.exports = {
   login,
+  googleLogin,
   me,
   register,
 };

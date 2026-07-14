@@ -9,6 +9,10 @@ async function findByEmail(email) {
   return getDb()(userModel.tableName).where({ email }).first();
 }
 
+async function findByGoogleSubject(googleSubject) {
+  return getDb()(userModel.tableName).where({ google_subject: googleSubject }).first();
+}
+
 async function list({ limit = 50, offset = 0 } = {}) {
   return getDb()(userModel.tableName)
     .select('id', 'full_name', 'email', 'phone', 'role', 'is_active', 'created_at')
@@ -27,21 +31,33 @@ async function createWithProfile(payload) {
         email: payload.email,
         phone: payload.phone,
         password_hash: payload.passwordHash,
+        google_subject: payload.googleSubject || null,
         role: payload.role,
       })
       .returning('*');
 
     await trx('profiles').insert({
       user_id: user.id,
+      avatar_url: payload.avatarUrl || null,
     });
 
     return user;
   });
 }
 
+async function setGoogleSubject(id, googleSubject) {
+  const [user] = await getDb()(userModel.tableName)
+    .where({ id })
+    .update({ google_subject: googleSubject })
+    .returning('*');
+  return user;
+}
+
 module.exports = {
   createWithProfile,
   findByEmail,
+  findByGoogleSubject,
   findById,
   list,
+  setGoogleSubject,
 };

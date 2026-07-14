@@ -20,7 +20,16 @@ const loginSchema = z.object({
   params: z.object({}).passthrough(),
 });
 
+const googleLoginSchema = z.object({
+  body: z.object({
+    idToken: z.string().trim().min(20).max(4096),
+  }),
+  query: z.object({}).passthrough(),
+  params: z.object({}).passthrough(),
+});
+
 module.exports = {
+  googleLoginSchema,
   loginSchema,
   registerSchema,
 };
