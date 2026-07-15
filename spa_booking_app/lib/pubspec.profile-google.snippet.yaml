@@ -1,0 +1,6 @@
+# Them cac dependency nay vao pubspec.yaml cua ung dung Flutter.
+dependencies:
+  provider: ^6.1.5
+  http: ^1.2.2
+  google_sign_in: ^7.2.0
+  google_sign_in_web: ^1.1.3
