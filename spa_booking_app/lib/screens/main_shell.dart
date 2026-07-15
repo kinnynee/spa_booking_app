@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants/app_assets.dart';
 import '../core/constants/app_colors.dart';
 import '../models/spa_service.dart';
 import '../providers/booking_provider.dart';
@@ -45,35 +44,23 @@ class MainShell extends StatelessWidget {
             indicatorColor: AppColors.secondary,
             destinations: const [
               NavigationDestination(
-                icon: _NavImageIcon(asset: AppAssets.navHome),
-                selectedIcon: _NavImageIcon(
-                  asset: AppAssets.navHome,
-                  selected: true,
-                ),
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
                 label: 'Trang chá»§',
               ),
               NavigationDestination(
-                icon: _NavImageIcon(asset: AppAssets.navService),
-                selectedIcon: _NavImageIcon(
-                  asset: AppAssets.navService,
-                  selected: true,
-                ),
+                icon: Icon(Icons.spa_outlined),
+                selectedIcon: Icon(Icons.spa),
                 label: 'Dá»‹ch vá»¥',
               ),
               NavigationDestination(
-                icon: _NavImageIcon(asset: AppAssets.navCalendar),
-                selectedIcon: _NavImageIcon(
-                  asset: AppAssets.navCalendar,
-                  selected: true,
-                ),
+                icon: Icon(Icons.calendar_month_outlined),
+                selectedIcon: Icon(Icons.calendar_month),
                 label: 'Lá»‹ch háº¹n',
               ),
               NavigationDestination(
-                icon: _NavImageIcon(asset: AppAssets.navProfile),
-                selectedIcon: _NavImageIcon(
-                  asset: AppAssets.navProfile,
-                  selected: true,
-                ),
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
                 label: 'Há»“ sÆ¡',
               ),
             ],
@@ -84,23 +71,3 @@ class MainShell extends StatelessWidget {
   }
 }
 
-class _NavImageIcon extends StatelessWidget {
-  const _NavImageIcon({required this.asset, this.selected = false});
-
-  final String asset;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
-      opacity: selected ? 1 : .66,
-      child: Image.asset(
-        asset,
-        width: selected ? 30 : 26,
-        height: selected ? 30 : 26,
-        fit: BoxFit.contain,
-      ),
-    );
-  }
-}

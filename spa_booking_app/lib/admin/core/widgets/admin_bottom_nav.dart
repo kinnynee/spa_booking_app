@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../screens/bookings/bookings_screen.dart';
-import '../../screens/dashboard/dashboard_screen.dart';
-import '../../screens/services/services_screen.dart';
-import '../../screens/customers/customers_screen.dart';
-import '../../screens/more/more_screen.dart';
-import '../constants/admin_colors.dart';
 
-/// Bottom Navigation Bar dùng chung cho toàn bộ Admin App.
+import '../../screens/bookings/bookings_screen.dart';
+import '../../screens/customers/customers_screen.dart';
+import '../../screens/dashboard/dashboard_screen.dart';
+import '../../screens/more/more_screen.dart';
+import '../../screens/services/services_screen.dart';
+import '../constants/admin_colors.dart';
+import '../../../core/constants/app_assets.dart';
+
+/// Bottom navigation dùng chung cho toàn bộ Admin App.
 class AdminBottomNav extends StatelessWidget {
   const AdminBottomNav({super.key, required this.currentIndex, required this.onTap});
 
@@ -32,11 +34,11 @@ class AdminBottomNav extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _NavItem(icon: Icons.grid_view_rounded, label: 'Tổng quan', index: 0, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.calendar_month_rounded, label: 'Lịch hẹn', index: 1, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.spa_rounded, label: 'Dịch vụ', index: 2, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.people_alt_rounded, label: 'Khách hàng', index: 3, currentIndex: currentIndex, onTap: onTap),
-              _NavItem(icon: Icons.more_horiz_rounded, label: 'Thêm', index: 4, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(asset: AppAssets.navHome, label: 'Tổng quan', index: 0, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(asset: AppAssets.navCalendar, label: 'Lịch hẹn', index: 1, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(asset: AppAssets.navService, label: 'Dịch vụ', index: 2, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(asset: AppAssets.navProfile, label: 'Khách hàng', index: 3, currentIndex: currentIndex, onTap: onTap),
+              _NavItem(asset: AppAssets.navHome, label: 'Thêm', index: 4, currentIndex: currentIndex, onTap: onTap),
             ],
           ),
         ),
@@ -47,14 +49,14 @@ class AdminBottomNav extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   const _NavItem({
-    required this.icon,
+    required this.asset,
     required this.label,
     required this.index,
     required this.currentIndex,
     required this.onTap,
   });
 
-  final IconData icon;
+  final String asset;
   final String label;
   final int index;
   final int currentIndex;
@@ -69,6 +71,7 @@ class _NavItem extends StatelessWidget {
       child: SizedBox(
         width: 64,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(
@@ -78,10 +81,20 @@ class _NavItem extends StatelessWidget {
                 color: isSelected ? AdminColors.secondaryFixed : Colors.transparent,
                 borderRadius: BorderRadius.circular(99),
               ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: isSelected ? AdminColors.primary : AdminColors.outline,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 180),
+                opacity: isSelected ? 1 : .58,
+                child: Image.asset(
+                  asset,
+                  width: 22,
+                  height: 22,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) => Icon(
+                    Icons.image_not_supported_outlined,
+                    size: 20,
+                    color: isSelected ? AdminColors.primary : AdminColors.outline,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 2),
@@ -101,7 +114,6 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-/// Shell chính của Admin App – chứa bottom nav và các màn hình.
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
 
@@ -123,10 +135,7 @@ class _AdminShellState extends State<AdminShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: AdminBottomNav(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),

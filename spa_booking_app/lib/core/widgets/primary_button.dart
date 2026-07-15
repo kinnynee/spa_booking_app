@@ -1,7 +1,10 @@
+// Thư viện Material cung cấp FilledButton và Icon.
 import 'package:flutter/material.dart';
 
+// Import màu chính và màu disabled của nút.
 import '../constants/app_colors.dart';
 
+// Nút chính dùng lại ở login, register, booking và màn chi tiết dịch vụ.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     super.key,
@@ -15,6 +18,7 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
 
   @override
+  // build tạo FilledButton có chiều cao, màu và bo góc thống nhất.
   Widget build(BuildContext context) {
     return FilledButton.icon(
       onPressed: onPressed,

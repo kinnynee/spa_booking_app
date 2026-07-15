@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-store/
+.secrets/
+.env
+.env.*
+!.env.example
+coverage/
+logs/*.log
+logs/*.json
+tmp/
+dist/
+build/
+*.local
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

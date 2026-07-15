@@ -1,46 +1,22 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import '../data/mock_services.dart';
+import '../data/api/booking_api_service.dart';
 import '../models/appointment.dart';
 import '../models/spa_service.dart';
 
-class BookingProvider extends ChangeNotifier {
-  final List<Appointment> _appointments = [
-    Appointment(
-      id: 'sample-1',
-      service: mockServices.first,
-      date: DateTime.now().add(const Duration(days: 1)),
-      time: '10:00',
-      customerName: 'Trần Trung Kiên',
-      phone: '0901 234 567',
-      note: 'Ưu tiên phòng yên tĩnh',
-      status: AppointmentStatus.pending,
-    ),
-    Appointment(
-      id: 'sample-2',
-      service: mockServices[1],
-      date: DateTime.now().subtract(const Duration(days: 2)),
-      time: '15:00',
-      customerName: 'Trần Trung Kiên',
-      phone: '0901 234 567',
-      note: '',
-      status: AppointmentStatus.completed,
-    ),
-  ];
+class BookingProvider with ChangeNotifier {
+  final BookingApiService _apiService = BookingApiService();
 
+  List<Appointment> _bookings = [];
+  bool _isLoading = false;
+  String? _error;
   int _currentTabIndex = 0;
 
-  List<Appointment> get appointments => List.unmodifiable(_appointments);
-
-  List<Appointment> get upcomingAppointments => _appointments
-      .where(
-        (a) =>
-            a.status == AppointmentStatus.pending ||
-            a.status == AppointmentStatus.confirmed,
-      )
-      .toList();
-
+  List<Appointment> get appointments => _bookings;
+  List<Appointment> get upcomingAppointments => _bookings.where((a) => a.status == AppointmentStatus.pending || a.status == AppointmentStatus.confirmed).toList();
+  List<Appointment> get bookings => _bookings;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
   int get currentTabIndex => _currentTabIndex;
 
   void setCurrentTab(int index) {
@@ -48,47 +24,78 @@ class BookingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addAppointment({
+  // Fetch list of bookings from API
+  Future<void> fetchMyBookings() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _bookings = await _apiService.fetchMyBookings();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Create a booking with the current API contract and update local state.
+  Future<bool> createBooking({
     required SpaService service,
     required DateTime date,
     required String time,
     required String customerName,
     required String phone,
     required String note,
-  }) {
-    _appointments.insert(
-      0,
-      Appointment(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+  }) async {
+    final parts = time.split(':');
+    final hour = int.tryParse(parts.first) ?? 0;
+    final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+    final appointmentTime = DateTime(date.year, date.month, date.day, hour, minute);
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final newBooking = await _apiService.createBooking(
         service: service,
-        date: date,
-        time: time,
+        appointmentTime: appointmentTime,
         customerName: customerName,
         phone: phone,
         note: note,
-        status: AppointmentStatus.pending,
-      ),
-    );
-    notifyListeners();
+      );
+      _bookings.insert(0, newBooking);
+      return true;
+    } catch (error) {
+      _error = error.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  void cancelAppointment(String id) {
-    final index = _appointments.indexWhere(
-      (appointment) => appointment.id == id,
-    );
-    if (index == -1) {
-      return;
+  // Cancel booking
+  Future<bool> cancelBooking(String bookingId) async {
+    try {
+      await _apiService.cancelBooking(bookingId);
+      final index = _bookings.indexWhere((b) => b.id == bookingId);
+      if (index != -1) {
+        _bookings[index] = _bookings[index].copyWith(status: AppointmentStatus.cancelled);
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
     }
-
-    _appointments[index] = _appointments[index].copyWith(
-      status: AppointmentStatus.cancelled,
-    );
-    notifyListeners();
   }
 }
 
 String formatMoney(int amount) {
-  return '${NumberFormat('#,###', 'vi_VN').format(amount).replaceAll(',', '.')}đ';
+  return '${NumberFormat('#,###', 'vi_VN').format(amount).replaceAll(',', '.')}\u0111';
 }
 
 String formatDate(DateTime date) {

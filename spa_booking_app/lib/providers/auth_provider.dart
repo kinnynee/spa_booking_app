@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../core/network/api_client.dart';
 import '../data/auth/google_auth_service.dart';
 import '../data/api/auth_api_service.dart';
+import '../data/mock_user.dart';
 import '../models/user_profile.dart';
 
 // Provider quản lý trạng thái đăng nhập, user hiện tại và token phiên làm việc.
@@ -26,16 +27,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
   bool _isLoading = false;
   String? _errorMessage;
-  UserProfile _currentUser = const UserProfile(
-    fullName: '',
-    email: '',
-    phone: '',
-    birthday: '',
-    gender: '',
-    genderCode: '',
-    address: '',
-    avatar: '',
-  );
+  UserProfile _currentUser = mockUser;
   String? _accessToken;
   String? _refreshToken;
 

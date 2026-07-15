@@ -141,7 +141,7 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_selectedDate == null) {
       _showError('Vui lòng chọn ngày');
       return;
@@ -160,7 +160,8 @@ class _BookingScreenState extends State<BookingScreen> {
       return;
     }
 
-    context.read<BookingProvider>().addAppointment(
+    final provider = context.read<BookingProvider>();
+    final success = await provider.createBooking(
       service: widget.service,
       date: _selectedDate!,
       time: _selectedTime!,
@@ -169,11 +170,20 @@ class _BookingScreenState extends State<BookingScreen> {
       note: _noteController.text.trim(),
     );
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Đặt lịch thành công')));
-    context.read<BookingProvider>().setCurrentTab(2);
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (!success) {
+      if (mounted) {
+        _showError(provider.error ?? 'Lỗi đặt lịch');
+      }
+      return;
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Đặt lịch thành công')));
+      context.read<BookingProvider>().setCurrentTab(2);
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   void _showError(String message) {
