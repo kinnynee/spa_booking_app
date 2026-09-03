@@ -330,9 +330,10 @@ flutter test
 
 | Thành viên | Công việc | Tỷ lệ đóng góp |
 | --- | --- | --- |
-| [Họ tên 1] | [Nội dung công việc] | [..%] |
-| [Họ tên 2] | [Nội dung công việc] | [..%] |
+| [Trần Trung Kiên] | [Thiết kế UI, UX phần login, logout] | [33%] |
+| [Hoàng Trần Việt Khải] | [Đảm nhận chức năng đặt lịch và thiết kế giao diện người dùng] | [32%] |
+| [Dương Xuân Hưng] | [Đảm nhận toàn bộ Backend và database] | [34%] |
 
 ---
 
-**Ngày hoàn thành báo cáo:** [Ngày/tháng/năm]
+**Ngày hoàn thành báo cáo:** [ngày 12/tháng 7/năm 2026]
